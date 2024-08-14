@@ -1,8 +1,10 @@
+import { useSearchParams } from 'react-router-dom';
+
 import Spinner from '../../ui/Spinner';
 import CabinRow from './CabinRow';
 import { useCabins } from './useCabins';
 import Table from '../../ui/Table';
-import { useSearchParams } from 'react-router-dom';
+import Empty from '../../ui/Empty';
 
 export default function CabinTable() {
   //connect to custom hook
@@ -14,6 +16,11 @@ export default function CabinTable() {
   if (isLoading) {
     return <Spinner />;
   }
+
+  if (!cabins.length) {
+    return <Empty resourceName="cabins" />;
+  }
+
   // 1) FILTER
   //get params and set 'all' by default, when go to this page
   const filterValue = searchParams.get('discount') || 'all';
