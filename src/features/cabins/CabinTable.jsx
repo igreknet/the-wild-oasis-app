@@ -1,32 +1,33 @@
-import styled from 'styled-components';
-
 import Spinner from '../../ui/Spinner';
 import CabinRow from './CabinRow';
 import { useCabins } from './useCabins';
 import Table from '../../ui/Table';
-
-const TableHeader = styled.header`
-  display: grid;
-  grid-template-columns: 0.6fr 1.8fr 2.2fr 1fr 1fr 1fr;
-  column-gap: 2.4rem;
-  align-items: center;
-
-  background-color: var(--color-grey-50);
-  border-bottom: 1px solid var(--color-grey-100);
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  font-weight: 600;
-  color: var(--color-grey-600);
-  padding: 1.6rem 2.4rem;
-`;
+import { useSearchParams } from 'react-router-dom';
 
 export default function CabinTable() {
   //connect to custom hook
   //making query to supabase, to get data - queryFn: getCabins
   const { isLoading, cabins } = useCabins();
 
+  const [searchParams] = useSearchParams();
+
   if (isLoading) {
     return <Spinner />;
+  }
+
+  //get params and set 'all' by default, when go to this page
+  const filterValue = searchParams.get('discount') || 'all';
+
+  //create logic for filtering cabins
+  let filteredCabins;
+  if (filterValue === 'all') {
+    filteredCabins = cabins;
+  }
+  if (filterValue === 'no-discount') {
+    filteredCabins = cabins.filter(cabin => cabin.discount === 0);
+  }
+  if (filterValue === 'with-discount') {
+    filteredCabins = cabins.filter(cabin => cabin.discount > 0);
   }
 
   return (
@@ -41,7 +42,16 @@ export default function CabinTable() {
       </Table.Header>
 
       {/* render props: */}
-      <Table.Body data={cabins} render={cabin => <CabinRow cabin={cabin} key={cabin.id} />} />
+      <Table.Body
+        // data={cabins}
+        data={filteredCabins}
+        render={cabin => (
+          <CabinRow
+            cabin={cabin}
+            key={cabin.id}
+          />
+        )}
+      />
     </Table>
   );
 }
